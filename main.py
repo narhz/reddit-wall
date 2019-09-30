@@ -41,12 +41,12 @@ def get_user_subs():
     return subs
 
 
-def get_posts():
+def get_urls():
     reddit = auth_reddit()
 
     urls = []
     for sub in get_user_subs():
-        for post in reddit.subreddit(sub).hot(limit=int(get_config()['PREFS']['img_amount'])):
+        for post in reddit.subreddit(sub).hot():
             if post.is_self == True:
                 pass
             elif post.stickied == True:
@@ -57,8 +57,28 @@ def get_posts():
             else:
                 pass
 
+    return urls
+
+
+def get_imgs(limit):
+    urls = get_urls()
+
+    count = 0
+    for url in urls:
+        try:
+            if url[-4:] == '.jpg':
+                with open('imgs/' + url[-12:], 'wb') as img:
+                    img.write(requests.get(url).content)
+                count += 1
+            else:
+                pass
+        except Exception as e:
+            print(e)
+
+        if count == limit:
+            break
 
 
 
 if __name__ == '__main__':
-    get_posts()
+    get_imgs(10)
